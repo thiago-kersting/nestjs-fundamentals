@@ -1,47 +1,51 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Put } from "@nestjs/common";
-import { CreateUserDTO } from "./dto/create-user.dto";
-import { UpdatePutUserDTO } from "./dto/update-put-user.dto";
-import { UpdatePatchUserDTO } from "./dto/update-patch-user.dto";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Patch,
+  Post,
+  Put,
+} from '@nestjs/common';
+import { CreateUserDTO } from './dto/create-user.dto';
+import { UpdatePutUserDTO } from './dto/update-put-user.dto';
+import { UpdatePatchUserDTO } from './dto/update-patch-user.dto';
+import { UserService } from './user.service';
+import { ParamId } from 'src/decorators/param-id.decorator';
 
+// assim pega em todos do controller
+// @UseInterceptors(LogInterceptor)
 @Controller('users')
 export class UserController {
-    @Post()
-    async create(@Body() {email, name, password}: CreateUserDTO) {
-        return { email, name, password };
-    }
+  constructor(private readonly userService: UserService) {}
 
-    @Get()
-    async read() {
-        return {users: []}
-    }
+  @Post()
+  async create(@Body() data: CreateUserDTO) {
+    return this.userService.create(data);
+  }
 
-    @Get(':id')
-    async readOne(@Param('id', ParseIntPipe) id) {
-        return { user: {}, id }
-    }
+  @Get()
+  async list() {
+    return this.userService.list();
+  }
 
-    @Put(':id')
-    async update(@Body() { name, email, password }: UpdatePutUserDTO, @Param('id', ParseIntPipe) id) {
-        return { 
-            method: "PUT",
-            name, email, password,
-            id 
-        };
-    }
-    
-    @Patch(':id')
-    async updatePartial(@Body() { name, email, password }: UpdatePatchUserDTO, @Param('id', ParseIntPipe) id) {
-        return { 
-            method: "PATCH",
-            name, email, password,
-            id 
-        };
-    }
+  @Get(':id')
+  async show(@ParamId() id) {
+    return this.userService.show(id);
+  }
 
-    @Delete(':id')
-    async deleteOne(@Param('id', ParseIntPipe) id) {
-        return {
-            id
-        }
-    }
+  @Put(':id')
+  async update(@Body() data: UpdatePutUserDTO, @ParamId() id) {
+    return this.userService.update(id, data);
+  }
+
+  @Patch(':id')
+  async updatePartial(@Body() data: UpdatePatchUserDTO, @ParamId() id) {
+    return this.userService.updatePartial(id, data);
+  }
+
+  @Delete(':id')
+  async deleteOne(@ParamId() id) {
+    return this.userService.delete(id);
+  }
 }
